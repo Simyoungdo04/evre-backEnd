@@ -34,6 +34,7 @@ import com.tri.evre.station.model.dto.StationDto;
 import com.tri.evre.station.model.dto.StationSearchRequest;
 import com.tri.evre.station.model.vo.Station;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -247,7 +248,7 @@ public class AdminService {
 	}
 
 	@Transactional
-	public void insertStation(Station station) {
+	public void insertStation(StationDto station) {
 		Station stationEntity = Station.builder()
 									   .stationName(station.getStationName())
 									   .stationDesc(station.getStationDesc())
@@ -286,6 +287,29 @@ public class AdminService {
 		station.setUnableChargerCount(unableChargers);
 		
 		return station;
+	}
+
+	// 07/04 충전소 수정
+	public void updateStation(Long stationNo, StationDto station) {
+		Station stationEntity = Station.builder()
+				   .stationNo(stationNo)
+				   .stationName(station.getStationName())
+				   .stationDesc(station.getStationDesc())
+				   .region(station.getRegion())
+				   .address(station.getAddress())
+				   .lat(station.getLat())
+				   .lng(station.getLng())
+				   .status(station.getStatus())
+				   .build();
+		
+		SearchInfo stationInfo = new SearchInfo(station.getLat(), station.getLng());
+		
+		int duplicateStation = stationMapper.checkDuplicate(stationInfo);
+		if(duplicateStation > 0) {
+			throw new StationCreateException("충전소가 중복입니다.");
+		}
+		
+		stationMapper.updateStation(stationEntity);
 	} 
 
 }

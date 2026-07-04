@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import com.tri.evre.common.model.dto.PageInfo;
 import com.tri.evre.station.model.dto.SearchInfo;
@@ -194,6 +195,22 @@ public interface StationMapper {
 				   	   LNG = #{lng}
 			""")
 	int checkDuplicate(SearchInfo stationInfo);
+
+	@Update("""
+				UPDATE
+					   STATION
+				   SET
+				   	   STATION_NAME = #{stationName}
+				   	 , STATION_DESC = #{stationDesc}
+				   	 , REGION = #{region}
+			 		 , ADDRESS = #{address}
+			 		 , LAT = #{lat}
+			  		 , LNG = #{lng}
+			  		 , STATUS = #{status}
+			  	 WHERE
+			  	 	   STATION_NO = #{stationNo}
+			""")
+	void updateStation(Station stationEntity);
 
 	
 	

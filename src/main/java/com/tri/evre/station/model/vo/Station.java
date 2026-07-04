@@ -25,4 +25,5 @@ public class Station {
 	private int chargerCount;
 	private double lat;
 	private double lng;
+	private String status;
 }

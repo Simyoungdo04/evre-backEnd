@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -193,9 +194,8 @@ public class AdminController {
 	
 	// 07/03 심영도 충전소 작성
 	@PostMapping("/chargeStations")
-	public ResponseEntity<ApiResponse<Void>> insertStation(@RequestBody @Valid Station station) {
+	public ResponseEntity<ApiResponse<Void>> insertStation(@RequestBody @Valid StationDto station) {
 		adminService.insertStation(station);
-		log.info("station : {}", station);
 		return ResponseEntity.status(CustomHttpStatus.CREATE_SUCCESS.getCode()).body(ApiResponse.created("충전소 작성 성공", null));
 	}
 	
@@ -203,5 +203,13 @@ public class AdminController {
 	@GetMapping("/chargeStations/{stationNo}")
 	public ResponseEntity<ApiResponse<StationDto>> findByStationNo(@PathVariable(name="stationNo") Long stationNo){
 		return ResponseEntity.status(CustomHttpStatus.SELECT_SUCCESS.getCode()).body(ApiResponse.success("충전소 조회 성공", adminService.findByStationNo(stationNo)));
+	}
+	
+	// 07/04 심영도 충전소 수정
+	@PatchMapping("/chargeStations/{stationNo}")
+	public ResponseEntity<ApiResponse<Void>> updateStation(@PathVariable(name="stationNo") Long stationNo,
+														   @RequestBody @Valid StationDto station) {
+		adminService.updateStation(stationNo, station);
+		return ResponseEntity.status(CustomHttpStatus.UPDATE_SUCCESS.getCode()).body(ApiResponse.created("충전소 수정 성공", null));
 	}
 }

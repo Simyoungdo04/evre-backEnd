@@ -15,9 +15,11 @@ import com.tri.evre.file.service.FileService;
 import com.tri.evre.global.auth.model.vo.CustomUserDetails;
 import com.tri.evre.global.exception.board.BoardDeleteException;
 import com.tri.evre.global.exception.board.BoardNotFoundException;
+import com.tri.evre.global.exception.charger.ChargerReadException;
 import com.tri.evre.global.exception.shop.ProductNotFoundException;
 import com.tri.evre.global.exception.station.StationCreateException;
 import com.tri.evre.global.exception.station.StationNotFoundException;
+import com.tri.evre.global.exception.station.StationReadException;
 import com.tri.evre.product.model.dao.ProductMapper;
 import com.tri.evre.product.model.dto.ProductDto;
 import com.tri.evre.product.model.dto.ProductListDto;
@@ -167,6 +169,60 @@ public class AdminService {
 	
 	
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	// -----------------07/03 심영도 충전소 전체 조회ㅋㅋ
 	@Transactional
 	public StationSearchRequest findAllStations(PageInfo pageInfo) {
@@ -209,6 +265,27 @@ public class AdminService {
 		}
 		
 		stationMapper.insertStation(stationEntity);
+	}
+
+	// 07/04 심영도 충전소 상세보기
+	@Transactional
+	public StationDto findByStationNo(Long stationNo) {
+		
+		StationDto station = stationMapper.findByStationNo(stationNo);
+		if(station == null) {
+			throw new StationReadException("충전소 조회에 실패했습니다.");
+		}
+		
+		int chargerCount = stationMapper.findChargerCount(station.getStationNo()); 
+		if(chargerCount < 0) {
+			throw new ChargerReadException("충전기 조회에 실패했습니다.");
+		}
+		
+		int unableChargers = stationMapper.findUnableCharger(station.getStationNo());
+		station.setChargerCount(chargerCount);
+		station.setUnableChargerCount(unableChargers);
+		
+		return station;
 	} 
 
 }

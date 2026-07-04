@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace ="com.tri.evre.shop.model.dao.ShopMapper">
+
+
+
+	<select id="findAll" resultType="ProductListDto">
+			
+		SELECT
+					P.PRODUCT_NO
+				  , P.PRODUCT_NAME
+				  , I.AMOUNT
+				  , P.PRICE
+				  , I.IMAGE
+				  , P.STATUS
+			  FROM 
+			  		PRODUCT P
+			  JOIN
+			  		INVENTORY I
+			  	ON
+			  		P.PRODUCT_NO = I.PRODUCT_NO
+			  	WHERE 
+			  		P.PRICE &lt; 0
+			  	AND
+			  		P.STATUS='Y'
+			  	ORDER
+			  	   BY
+			  	   	P.PRODUCT_NO
+			  	OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+			  	
+			  	
+	</select>
+
+	
+	<select id="findByProductNo" resultType="ProductDto">
+			SELECT
+						PRODUCT_NO
+					  , PRODUCT_NAME
+					  , PRICE
+					  , USER_ID
+					  , STATUS
+				FROM
+						PRODUCT	  		
+				WHERE
+					 	PRODUCT_NO = #{productNo}
+	</select>
+		
+	<select id="findByInventory" resultType="InventoryDto">
+		SELECT
+				PRODUCT_NO
+			  , AMOUNT
+			  , IMAGE
+			FROM
+				INVENTORY
+			WHERE
+				PRODUCT_NO = #{productNo}
+	</select>	
+	
+	<update id="decrease">
+		
+		UPDATE
+				INVENTORY
+			SET	
+				AMOUNT = AMOUNT - 1
+			WHERE
+				PRODUCT_NO = #{productNo}
+		
+	</update>
+	
+	<insert id="insertHistoryMileage">
+		INSERT
+			INTO
+				HISTORY_MILEAGE
+				(
+					USER_ID
+				  , CHANGE
+				  , PRODUCT_NO
+				)
+			VALUES
+				(
+					#{user.username}
+			  	  , #{product.price}
+			  	  , #{product.productNo}
+				)
+	</insert>
+	
+	<select id="findTotalMileage" resultType="int">
+		SELECT
+				SUM(CHANGE)
+			FROM
+				HISTORY_MILEAGE
+			WHERE
+				USER_ID = #{username}
+	</select>
+	
+	
+	<select id="findHistoryMileage" resultType="int">
+		SELECT
+				COUNT(*)
+			FROM
+				HISTORY_MILEAGE
+			WHERE
+				USER_ID = #{username}
+	</select>
+	
+	<select id="findByHistoryPurchase" resultType="HistoryPurchaseDto">
+		SELECT
+				H.CHANGE
+			  , P.PRODUCT_NAME
+			  , H.CREATE_DATE
+			 FROM
+			 	HISTORY_MILEAGE H
+			 JOIN
+			 	PRODUCT P
+			   ON
+			   	H.PRODUCT_NO = P.PRODUCT_NO
+			WHERE
+				H.USER_ID = #{user.username}
+			AND
+				H.CHANGE &lt; 0	
+			ORDER
+			   BY
+				H.CREATE_DATE
+			OFFSET #{pageInfo.offset} ROWS FETCH NEXT #{pageInfo.size} ROWS ONLY
+	</select>
+	
+	
+	<select id="findAllProductAdmin">
+		SELECT
+					P.PRODUCT_NO
+				  , P.PRODUCT_NAME
+				  , I.AMOUNT
+				  , P.PRICE
+				  , I.IMAGE
+				  , P.STATUS
+			  FROM 
+			  		PRODUCT P
+			  JOIN
+			  		INVENTORY I
+			  	ON
+			  		P.PRODUCT_NO = I.PRODUCT_NO
+			  	WHERE 
+			  		P.PRICE &lt; 0
+			  	ORDER
+			  	   BY
+			  	   	P.PRODUCT_NO
+			  	OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+	
+	
+	<!-- 07/02 재준-->
+	
+	<select id="findAllPurchaseProduct">
+		SELECT   
+				COUNT(*) AS PURCHASE_COUNT 
+			 , 	P.PRODUCT_NAME  
+		  FROM 
+		  		HISTORY_MILEAGE H 
+		  JOIN 
+		  		PRODUCT P  
+		  	ON  
+		  		H.PRODUCT_NO  = P.PRODUCT_NO  
+		 GROUP 
+		  	BY 
+		  		H.PRODUCT_NO, P.PRODUCT_NAME
+		 ORDER
+		 	BY
+		 		PURCHASE_COUNT DESC
+	</select>
+	
+	<!-- 
+		정렬 기준이 모호해서
+		T0_CHAR(CREATE_DATE, 'D') -> 이건 요일을 숫자로 뽑아줌
+		EX) 일 : 0 월 : 1 ....
+		그래서 이걸로 정렬을 해줬음
+		TO_NUMBER는 어차피 위에서 숫자로 뽑아왔기때문에 안써도 되지만
+		의미를 명확하게 전달하기위해 써준다고함(실무기준)
+	-->
+	<select id="findByPurchaseCount">
+		SELECT
+    			TO_CHAR(CREATE_DATE, 'DY', 'NLS_DATE_LANGUAGE=KOREAN') AS DAY,
+    			COUNT(*) AS PURCHASE_COUNT
+		  FROM 
+		  		HISTORY_MILEAGE
+		 GROUP 
+		 	BY
+    			TO_CHAR(CREATE_DATE, 'D'),
+    			TO_CHAR(CREATE_DATE, 'DY', 'NLS_DATE_LANGUAGE=KOREAN')
+		 ORDER 
+		 	BY
+    			TO_NUMBER(TO_CHAR(CREATE_DATE, 'D'))
+	</select>
+	
+	
+	
+	
+	
+</mapper>
